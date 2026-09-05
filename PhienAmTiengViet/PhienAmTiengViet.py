@@ -14,7 +14,7 @@ class PhienAmTiengViet:
         self.bang_am_chinh = BangAmChinh()
         self.bang_am_cuoi = BangAmCuoi()
 
-    def phien_am(self, tu):
+    def phien_am(self, tu, tu_bo_dau=None, thanh_dieu=None):
         """
         Phiên âm 1 từ (1 âm tiết) tiếng Việt.
         Quy trình:
@@ -23,11 +23,17 @@ class PhienAmTiengViet:
           Bước 3: Tách âm đệm
           Bước 4: Xác định âm chính
         """
-        tu = tu.lower().strip()
-        ket_qua = KetQuaPhienAm(tu)
+        # Nếu đã tách dấu/biến thể trước đó, ưu tiên dùng `tu_bo_dau` để phiên âm
+        if tu_bo_dau:
+            tu_to_process = tu_bo_dau
+        else:
+            tu_to_process = tu
+
+        tu_to_process = tu_to_process.lower().strip()
+        ket_qua = KetQuaPhienAm(tu_to_process)
 
         # ---- BƯỚC 1: Tách âm đầu ----
-        am_dau, phan_van = self.bang_am_dau.tach(tu)
+        am_dau, phan_van = self.bang_am_dau.tach(tu_to_process)
         if am_dau:
             am_vi, stt = self.bang_am_dau.tim(am_dau)
             ket_qua.am_dau = (am_dau, am_vi, stt)
