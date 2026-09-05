@@ -4,43 +4,25 @@ from BangAmChinh.BangAmChinh import BangAmChinh
 from BangAmCuoi.BangAmCuoi import BangAmCuoi
 from KetQuaPhienAm.KetQuaPhienAm import KetQuaPhienAm
 
-
 class PhienAmTiengViet:
-    """Class chính: kết hợp 4 bảng để phiên âm"""
-
     def __init__(self):
         self.bang_am_dau = BangAmDau()
         self.bang_am_dem = BangAmDem()
         self.bang_am_chinh = BangAmChinh()
         self.bang_am_cuoi = BangAmCuoi()
 
-    def phien_am(self, tu, tu_bo_dau=None, thanh_dieu=None):
-        """
-        Phiên âm 1 từ (1 âm tiết) tiếng Việt.
-        Quy trình:
-          Bước 1: Tách âm đầu
-          Bước 2: Tách âm cuối (từ phải sang)
-          Bước 3: Tách âm đệm
-          Bước 4: Xác định âm chính
-        """
-        # Nếu đã tách dấu/biến thể trước đó, ưu tiên dùng `tu_bo_dau` để phiên âm
-        if tu_bo_dau:
-            tu_to_process = tu_bo_dau
-        else:
-            tu_to_process = tu
+    def phien_am(self, tu_goc, tu_bo_dau, thanh_dieu):
+        ket_qua = KetQuaPhienAm(tu_goc, tu_bo_dau, thanh_dieu)
 
-        tu_to_process = tu_to_process.lower().strip()
-        ket_qua = KetQuaPhienAm(tu_to_process)
-
-        # ---- BƯỚC 1: Tách âm đầu ----
-        am_dau, phan_van = self.bang_am_dau.tach(tu_to_process)
+        # BƯỚC 1: Tách âm đầu
+        am_dau, phan_van = self.bang_am_dau.tach(tu_bo_dau)
         if am_dau:
             am_vi, stt = self.bang_am_dau.tim(am_dau)
             ket_qua.am_dau = (am_dau, am_vi, stt)
         else:
             ket_qua.am_dau = ("", "/ʔ-/", 22)
 
-        # ---- BƯỚC 2: Tách âm cuối (từ phải sang) ----
+        # BƯỚC 2: Tách âm cuối
         am_cuoi, phan_giua = self.bang_am_cuoi.tach(phan_van)
         if am_cuoi:
             am_vi, stt = self.bang_am_cuoi.tim(am_cuoi)
@@ -48,7 +30,7 @@ class PhienAmTiengViet:
         else:
             ket_qua.am_cuoi = ("", "/zero/", 9)
 
-        # ---- BƯỚC 3: Tách âm đệm ----
+        # BƯỚC 3: Tách âm đệm
         am_dem, phan_am_chinh = self.bang_am_dem.tach(phan_giua, am_dau)
         if am_dem:
             am_vi, stt = self.bang_am_dem.tim(am_dem)
@@ -56,7 +38,7 @@ class PhienAmTiengViet:
         else:
             ket_qua.am_dem = ("", "/zero/", 2)
 
-        # ---- BƯỚC 4: Xác định âm chính ----
+        # BƯỚC 4: Xác định âm chính
         am_chinh, ket_qua_am_chinh = self.bang_am_chinh.tach(phan_am_chinh)
         if ket_qua_am_chinh:
             am_vi, stt = ket_qua_am_chinh
@@ -65,9 +47,3 @@ class PhienAmTiengViet:
             ket_qua.am_chinh = (am_chinh, None, None)
 
         return ket_qua
-
-    def phien_am_nhieu_tu(self, danh_sach_tu):
-        """Phiên âm nhiều từ liên tiếp"""
-        for tu in danh_sach_tu:
-            ket_qua = self.phien_am(tu)
-            ket_qua.hien_thi()
